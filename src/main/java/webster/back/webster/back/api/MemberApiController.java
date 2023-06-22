@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import webster.back.webster.back.domain.GenderStatus;
 import webster.back.webster.back.domain.Member;
+import webster.back.webster.back.service.MailService;
 import webster.back.webster.back.service.MemberService;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberApiController {
     private final MemberService memberservice;
+    private final MailService mailService;
 
     @PostMapping("/join")
     public CreateMemberResponse join(@RequestBody CreateMemberRequest request){
@@ -23,24 +25,32 @@ public class MemberApiController {
         member.setGender(request.gender);
         member.setPassword(request.password);
         Long id = memberservice.join(member);
-        return new CreateMemberResponse();
+        return new CreateMemberResponse(member);
     }
 
     @PostMapping("/login")
-    public SignUpMemberResponse login (@RequestBody SignUpMemberRequest request, @RequestParam HttpSession session){
+    public SignUpMemberResponse login (@RequestBody SignUpMemberRequest request){
         List<Member> loginresult = memberservice.login(request.email, request.password);
         if (loginresult.isEmpty()){
             System.out.println("failed");
         }
         else{
-            session.setMaxInactiveInterval(60*60*8);
-            session.setAttribute("email",request.email);
-            session.setAttribute("loginok","yes");
-
+//            session.setMaxInactiveInterval(60*60*8);
+//            session.setAttribute("email",request.email);
+//            session.setAttribute("loginOk","yes");
+            return new SignUpMemberResponse(request);
         }
 
         return new SignUpMemberResponse(request);
     }
+
+    //비밀번호 찾기
+    @PostMapping("/findpasswd")
+    public String findPasswd(@RequestBody String email){
+        mailService.findPassword(email);
+        return email;
+    }
+
 
     @Data
     static class CreateMemberRequest{
@@ -52,7 +62,11 @@ public class MemberApiController {
     }
     @Data
     static class CreateMemberResponse{
-        private Long id;
+        private String email;
+
+        public CreateMemberResponse(Member member){
+            this.email = member.getEmail();
+        }
 
     }
 

@@ -1,46 +1,18 @@
 package webster.back.webster.back.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import webster.back.webster.back.domain.Member;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
-public class MemberRepository {
+public interface MemberRepository extends JpaRepository<Member, Long> {
+    @Query(value="SELECT * FROM member WHERE email=email AND password=password", nativeQuery = true)
+    Optional<Member> findByEmailAndPassword(@Param("email")String email, @Param("password")String password);
 
-    @PersistenceContext
-    private EntityManager em;
-
-    public void save(Member member){
-    em.persist(member);
-    }
-    public Member findOne(Long id){
-        return em.find(Member.class, id);
-    }
-    public List<Member> findAll(){
-        return  em.createQuery("select m from Member m",Member.class)
-                .getResultList();
-
-    }
-    public List<Member> findByName(String name){
-        return em.createQuery("select m from Member m where m.name=:name",Member.class)
-                .setParameter("name",name)
-                .getResultList();
-    }
-    public List<Member> findByEmail(String email){
-        return em.createQuery("select m from Member m where m.email=:email",Member.class)
-                .setParameter("email",email)
-                .getResultList();
-    }
-
-    public  List<Member> findByEmailAndPassword(String email, String password){
-        return em.createQuery("select m from Member m where m.email=:email and m.password=:password",Member.class)
-                .setParameter("email",email)
-                .setParameter("password",password)
-                .getResultList();
-    }
-
-
+    @Query(value="SELECT * FROM member WHERE email=email",nativeQuery = true)
+    Optional<Member> findByEmail(@Param("email")String email);
 }

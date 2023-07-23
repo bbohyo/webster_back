@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    @Query(value="SELECT * FROM member WHERE email=email AND password=password", nativeQuery = true)
+    @Query(value="SELECT * FROM member WHERE email= :email AND password= :password", nativeQuery = true)
     Optional<Member> findByEmailAndPassword(@Param("email")String email, @Param("password")String password);
 
-    @Query(value="SELECT * FROM member WHERE email=email",nativeQuery = true)
+    @Query(value = "SELECT * FROM member WHERE email = :email", nativeQuery = true)
     Optional<Member> findByEmail(@Param("email")String email);
 }

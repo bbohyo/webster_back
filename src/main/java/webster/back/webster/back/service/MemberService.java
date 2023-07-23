@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class MemberService {
 
 
@@ -35,11 +35,11 @@ public class MemberService {
     public Long login(String email, String password){
         Optional<Member> member= memberRepository.findByEmailAndPassword(email,password);
 
-        if(member.isEmpty()){
-            throw new IllegalStateException("존재하지 않는 회원입니다.");
+        if(member.isPresent()){
+            return  1L;
         }
         else{
-            return 1L;
+            return 0L;
         }
     }
 

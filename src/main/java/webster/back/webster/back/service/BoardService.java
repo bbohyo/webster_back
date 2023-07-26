@@ -1,9 +1,12 @@
 package webster.back.webster.back.service;
 
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import webster.back.webster.back.domain.GroupEntity;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import webster.back.webster.back.domain.*;
 import webster.back.webster.back.repository.BoardRepository;
 import webster.back.webster.back.dto.BoardDto;
@@ -11,27 +14,37 @@ import webster.back.webster.back.dto.BoardDto;
 
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
-@RequiredArgsConstructor
 public class BoardService {
+
     @Autowired
     private BoardRepository boardRepository;
-    @Autowired
-    @NonNull
-    private DevLocation location;
-    @Autowired
-    @NonNull
-    private DevNumberOfPeople numberOfPeople;
-    @Autowired
-    @NonNull
-    private DevGender gender;
-    @Autowired
-    @NonNull
-    private DevSelectTime selectTime;
+
+    @PostConstruct
+    public void PostConstruct(){
+        if (boardRepository == null){
+            throw new IllegalStateException("ERROR");
+        }
+    }
+
+    private DevLocation location = DevLocation.함께식당;
+
+
+    private DevNumberOfPeople numberOfPeople = DevNumberOfPeople.TWO;
+
+
+    private DevGender gender = DevGender.MIX;
+
+
+    private DevSelectTime selectTime = DevSelectTime.ELEVENOCLOCK;
+
+    private GroupEntity groupEntity;
 
     private BoardDto convertEntityToDto(GroupEntity groupEntity) {
         return BoardDto.builder()
@@ -55,24 +68,61 @@ public class BoardService {
         return boardDtoList;
     }
     @Transactional
-    public void savePost_location(DevLocation location) {
-        this.location = location;
+    public void saveLocation(Long id, DevLocation location) {
+        if (boardRepository == null) {
+            throw new IllegalStateException("boardRepository is not initialized");
+        }
+
+        GroupEntity groupEntity = boardRepository.findById(id)
+                .orElseGet(() -> new GroupEntity(id, location, numberOfPeople, gender, selectTime));
+
+        groupEntity.setLocation(location);
+
+        boardRepository.save(groupEntity);
+    }
+
+
+    @Transactional
+    public void saveNumberOfPeople(Long id, DevNumberOfPeople numberOfPeople) {
+
+        if (boardRepository == null) {
+            throw new IllegalStateException("boardRepository is not initialized");
+        }
+
+        GroupEntity groupEntity = boardRepository.findById(id)
+                .orElseGet(() -> new GroupEntity(id, location, numberOfPeople, gender, selectTime));
+
+        groupEntity.setNumberOfPeople(numberOfPeople);
+
+        boardRepository.save(groupEntity).getId();
+    }
+    @Transactional
+    public void saveGender(Long id, DevGender gender){
+        if (boardRepository == null) {
+            throw new IllegalStateException("boardRepository is not initialized");
+        }
+
+        GroupEntity groupEntity = boardRepository.findById(id)
+                .orElseGet(() -> new GroupEntity(id, location, numberOfPeople, gender, selectTime));
+
+        groupEntity.setGender(gender);
+        boardRepository.save(groupEntity).getId();
     }
 
     @Transactional
-    public void savePost_num(DevNumberOfPeople numberOfPeople, DevGender gender) {
-        this.numberOfPeople = numberOfPeople;
-        this.gender = gender;
+    public void saveSelectTime (Long id, DevSelectTime selectTime){
+        if (boardRepository == null) {
+            throw new IllegalStateException("boardRepository is not initialized");
+        }
+
+        GroupEntity groupEntity = boardRepository.findById(id)
+                .orElseGet(() -> new GroupEntity(id, location, numberOfPeople, gender, selectTime));
+
+        groupEntity.setGender(gender);
+
+        boardRepository.save(groupEntity).getId();
     }
 
-    @Transactional
-    public void savePost_selectTime (DevSelectTime selectTime){
-        this.selectTime = selectTime;
-    }
-    @Transactional
-    public Long savePost_db(BoardDto boardDto) {
-        return boardRepository.save(boardDto.toEntity()).getId();
-}
     @Transactional
     public void deletePost(Long id) {
         boardRepository.deleteById(id);

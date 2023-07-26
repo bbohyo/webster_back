@@ -1,9 +1,11 @@
 package webster.back.webster.back.controller;
 
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import webster.back.webster.back.domain.DevGender;
 import webster.back.webster.back.domain.DevLocation;
+import webster.back.webster.back.domain.DevGender;
 import webster.back.webster.back.domain.DevNumberOfPeople;
 import webster.back.webster.back.domain.DevSelectTime;
 import webster.back.webster.back.dto.BoardDto;
@@ -18,25 +20,53 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@AllArgsConstructor
 public class BoardController {
 
+    @Autowired
     private BoardService boardService;
 
-    @Autowired
+    @PostConstruct
+    public void postConstruct() {
+        if (boardService == null) {
+            throw new IllegalStateException("boardService is not initialized");
+        }
+    }
     private BoardRepository boardRepository;
-    @Autowired
-    @NonNull
+
+
     private DevLocation location;
-    @Autowired
-    @NonNull
+
+
     private DevNumberOfPeople numberOfPeople;
-    @Autowired
-    @NonNull
+
+
     private DevGender gender;
-    @Autowired
-    @NonNull
+
+
     private DevSelectTime selectTime;
+
+    public void LocationBean(){
+        switch (location){
+            case 부대통령:
+                this.location = DevLocation.부대통령;
+                break;
+
+        }
+    }
+    public void GenderBeen(){
+        switch(gender){
+            case FEMAIL:
+                this.gender = DevGender.FEMAIL;
+                break;
+            case MAIL:
+                this.gender = DevGender.MAIL;
+                break;
+            case MIX:
+                this.gender = DevGender.MIX;
+                break;
+        }
+    }
+
     /*리스트 출력*/
     @GetMapping("/")
     public String list(Model model){
@@ -53,28 +83,31 @@ public class BoardController {
     }
 
     @PostMapping("/post/location")
-    public String writeLocation(DevLocation location) {
-        boardService.savePost_location(location);
+    public String writeLocation(@RequestParam Long id, @RequestParam DevLocation location) {
+        if (boardService == null) {
+            return "redirect:/";
+        }
+
+        boardService.saveLocation(id, location);
 
         return "/post/time";
     }
     @PostMapping("/post/time")
-    public String writeTime(DevSelectTime selectTime) {
-        boardService.savePost_selectTime(selectTime);
+    public String writeTime(Long id, DevSelectTime selectTime) {
+        boardService.saveSelectTime(id, selectTime);
 
         return "/post/num";
     }
     @PostMapping("/post/num")
-    public String writeNum(DevNumberOfPeople numberOfPeople, DevGender gender) {
-        boardService.savePost_num(numberOfPeople, gender);
+    public String writeNumGender(Long id, DevNumberOfPeople numberOfPeople, DevGender gender) {
+        boardService.saveNumberOfPeople(id, numberOfPeople);
+        boardService.saveGender(id, gender);
 
         return "/post/fin";
     }
 
     @GetMapping("/post/fin")
-    public String writedb(BoardDto boardDto){
-        boardService.savePost_db(boardDto);
-
+    public String writeFin(){
         return "/list";
     }
 

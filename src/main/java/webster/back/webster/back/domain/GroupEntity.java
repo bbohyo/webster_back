@@ -9,9 +9,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Setter
 public class GroupEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -33,16 +36,17 @@ public class GroupEntity {
     @Column(name = "localDateTime")
     private LocalDateTime localDateTime;
 
+    public GroupEntity() {
+    }
 
     @Builder
     public GroupEntity(Long id, DevLocation location, DevNumberOfPeople numberOfPeople, DevGender gender, DevSelectTime selectTime) {
         this.id = id;
         this.location = location;
         this.numberOfPeople = numberOfPeople;
-        this.gender = gender;
-        this.selectTime = selectTime;
+        this.gender = this.gender;
+        this.selectTime = this.selectTime;
     }
-
 
 }
 
